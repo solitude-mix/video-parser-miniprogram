@@ -99,17 +99,24 @@ async def video_proxy(url: str):
     if not url:
         raise HTTPException(status_code=400, detail="Missing url parameter")
 
-    # 简单的防盗链处理 (模拟浏览器 UA)
+    # 简单的防盗链处理 
+    # 许多视频 CDN 如果检测到 Referer 不对会拒绝，不传 Referer 反而能通过
+    # 使用手机 UA 模拟移动端访问
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        "Referer": "https://www.douyin.com/" 
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+        # "Referer": "https://www.douyin.com/"  <-- 移除硬编码的 Referer
     }
 
     try:
         # stream=True 开启流式传输，避免大文件占满内存
-        r = requests.get(url, headers=headers, stream=True, timeout=30)
+        # verify=False 忽略 SSL 验证（部分 CDN 证书可能有问题）
+        r = requests.get(url, headers=headers, stream=True, timeout=30, verify=False)
         
-        # 转发 Content-Type，通常是 video/mp4
+        # 如果上游返回 403，手动抛出异常以便调试
+        if r.status_code == 403:
+             raise HTTPException(status_code=403, detail="Upstream server forbidden (Hotlinking)")
+
+        # 转发 Content-Type
         content_type = r.headers.get("Content-Type", "video/mp4")
         
         return StreamingResponse(
