@@ -1,13 +1,35 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/history/history"
+    "pages/history/history",
+    "pages/me/me",
+    "pages/about/about"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#1a1a1a",
     "navigationBarTitleText": "万能视频解析",
     "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#07c160",
+    "backgroundColor": "#1a1a1a",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/tab_home.png",
+        "selectedIconPath": "images/tab_home_active.png"
+      },
+      {
+        "pagePath": "pages/me/me",
+        "text": "我的",
+        "iconPath": "images/tab_me.png",
+        "selectedIconPath": "images/tab_me_active.png"
+      }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"

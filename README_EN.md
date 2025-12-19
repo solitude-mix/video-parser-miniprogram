@@ -16,6 +16,10 @@ This project is a video watermark removal and parsing tool based on a Python bac
 
 ### 🎨 WeChat Mini Program Frontend
 *   **Cool UI**: Designed with a dark tech style, featuring dynamic ambient backgrounds and glassmorphism effects.
+*   **User System**:
+    *   👤 **Member Center**: Features user login, profile display, and logout functionality.
+    *   🔒 **Access Control**: Viewing history requires login, protecting user privacy.
+    *   ℹ️ **About/Contact**: Built-in product intro, tutorials, disclaimer, and customer support contact.
 *   **Smart Interaction**:
     *   🔥 **Auto Clipboard Detection**: Automatically detects links in the clipboard upon opening the app and prompts for parsing.
     *   📜 **History**: Automatically saves parsing history, supporting review, one-click refill, and deletion.
@@ -62,9 +66,12 @@ Includes but not limited to:
 └── wechat_miniprogram/      # [Frontend] WeChat Mini Program source code
     ├── app.json
     ├── app.js
+    ├── images/              # Icon resources
     ├── pages/
     │   ├── index/           # Home page (Parsing)
-    │   └── history/         # History page
+    │   ├── history/         # History page
+    │   ├── me/              # User Center (Login/About)
+    │   └── about/           # About page
     └── utils/
 ```
 

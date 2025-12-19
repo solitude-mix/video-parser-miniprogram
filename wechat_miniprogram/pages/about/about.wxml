@@ -1,0 +1,28 @@
+<view class="container">
+  <view class="section">
+    <view class="title">产品介绍</view>
+    <view class="content">
+      <text>本小程序是一款全能视频解析工具，支持抖音、快手、B站、微博、小红书等 20+ 主流短视频平台的视频去水印解析。我们致力于为用户提供简洁、高效、无广告的使用体验。</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="title">使用说明</view>
+    <view class="content">
+      <text>1. 打开短视频 APP，找到您喜欢的视频。</text>
+      <text>2. 点击“分享”按钮，选择“复制链接”。</text>
+      <text>3. 打开本小程序，系统会自动检测并粘贴链接。</text>
+      <text>4. 点击“开始解析”，即可获取无水印视频和封面。</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="title">免责声明</view>
+    <view class="content">
+      <text>1. 本工具仅供个人学习、研究和欣赏使用，严禁用于任何商业用途。</text>
+      <text>2. 解析的视频版权归原作者及原平台所有。</text>
+      <text>3. 请尊重知识产权，不得利用本工具侵犯他人权益。</text>
+      <text>4. 如有侵权请联系我们删除。</text>
+    </view>
+  </view>
+</view>

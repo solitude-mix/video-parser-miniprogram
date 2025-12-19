@@ -1,5 +1,6 @@
 const app = getApp()
 const { addHistory } = require('../../utils/history');
+const { isLoggedIn } = require('../../utils/auth');
 
 Page({
   data: {
@@ -69,6 +70,22 @@ Page({
   },
 
   goToHistory() {
+    if (!isLoggedIn()) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后查看历史记录',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.switchTab({
+              url: '/pages/me/me'
+            })
+          }
+        }
+      })
+      return;
+    }
+
     wx.navigateTo({
       url: '/pages/history/history',
     })

@@ -1,0 +1,23 @@
+.section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #07c160;
+  margin-bottom: 20rpx;
+  border-left: 6rpx solid #07c160;
+  padding-left: 20rpx;
+}
+
+.content text {
+  display: block;
+  font-size: 28rpx;
+  color: #ccc;
+  line-height: 1.6;
+  margin-bottom: 10rpx;
+}
