@@ -61,7 +61,7 @@
         wx:if="{{!isImages}}" 
         id="videoPlayer"
         class="video-player" 
-        src="{{result.video_url}}" 
+        src="{{result.proxy_url || result.video_url}}" 
         poster="{{result.cover_url}}" 
         object-fit="contain"
         show-center-play-btn

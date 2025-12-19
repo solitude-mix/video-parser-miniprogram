@@ -48,55 +48,78 @@ class DouYin(BaseParser):
 
         if not json_data:
             # 如果专用API失败或者不是图集，使用标准解析方式
-            pattern = re.compile(
-                pattern=r"window\._ROUTER_DATA\s*=\s*(.*?)</script>",
-                flags=re.DOTALL,
-            )
-            find_res = pattern.search(response.text)
+            # 尝试匹配多种可能的 JSON 变量名
+            patterns = [
+                re.compile(r"window\._ROUTER_DATA\s*=\s*(.*?)</script>", re.DOTALL),
+                re.compile(r"window\._SSR_HYDRATED_DATA\s*=\s*(.*?)</script>", re.DOTALL),
+                re.compile(r"window\.RENDER_DATA\s*=\s*(.*?)</script>", re.DOTALL),
+                re.compile(r'<script id="RENDER_DATA" type="application/json">(.*?)</script>', re.DOTALL),
+            ]
+            
+            find_res = None
+            for pattern in patterns:
+                find_res = pattern.search(response.text)
+                if find_res and find_res.group(1):
+                     # 如果是 url encoded 的 json (RENDER_DATA 经常是这样)，需要解码
+                    try:
+                        raw_json = find_res.group(1).strip()
+                        # 尝试直接解析
+                        json_data = json.loads(raw_json)
+                        break
+                    except json.JSONDecodeError:
+                        try:
+                            # 尝试先 unquote 再解析
+                            from urllib.parse import unquote
+                            json_data = json.loads(unquote(raw_json))
+                            break
+                        except:
+                            continue
 
-            if not find_res or not find_res.group(1):
+            if not json_data:
+                # 记录一下失败时的 HTML 片段，方便调试（仅打印前500字符）
+                # print(f"Parse failed. HTML start: {response.text[:500]}")
                 raise ValueError("parse video json info from html fail")
-
-            json_data = json.loads(find_res.group(1).strip())
 
         # 处理不同的数据结构
         data = None
-        if isinstance(json_data, dict) and "aweme_details" in json_data:
-            # 专用API返回的数据结构
-            if len(json_data["aweme_details"]) > 0:
-                data = json_data["aweme_details"][0]
-        elif isinstance(json_data, dict) and "loaderData" in json_data:
-            # 标准HTML解析返回的数据结构
-            VIDEO_ID_PAGE_KEY = "video_(id)/page"
-            NOTE_ID_PAGE_KEY = "note_(id)/page"
+        # ... (后续代码处理逻辑需要兼容不同的 json 结构)
+        
+        # 针对 RENDER_DATA / _SSR_HYDRATED_DATA 结构的适配
+        if isinstance(json_data, dict):
+            # 1. 尝试匹配 aweme_details (API 返回)
+            if "aweme_details" in json_data:
+                if len(json_data["aweme_details"]) > 0:
+                    data = json_data["aweme_details"][0]
+            
+            # 2. 尝试匹配 loaderData (旧版 Router Data)
+            elif "loaderData" in json_data:
+                 # ... (原有的 loaderData 处理逻辑)
+                 VIDEO_ID_PAGE_KEY = "video_(id)/page"
+                 NOTE_ID_PAGE_KEY = "note_(id)/page"
 
-            original_video_info = None
-            if VIDEO_ID_PAGE_KEY in json_data["loaderData"]:
-                original_video_info = json_data["loaderData"][VIDEO_ID_PAGE_KEY][
-                    "videoInfoRes"
-                ]
-            elif NOTE_ID_PAGE_KEY in json_data["loaderData"]:
-                original_video_info = json_data["loaderData"][NOTE_ID_PAGE_KEY][
-                    "videoInfoRes"
-                ]
-            else:
-                raise Exception(
-                    "failed to parse Videos or Photo Gallery info from json"
-                )
+                 original_video_info = None
+                 if VIDEO_ID_PAGE_KEY in json_data["loaderData"]:
+                     original_video_info = json_data["loaderData"][VIDEO_ID_PAGE_KEY]["videoInfoRes"]
+                 elif NOTE_ID_PAGE_KEY in json_data["loaderData"]:
+                     original_video_info = json_data["loaderData"][NOTE_ID_PAGE_KEY]["videoInfoRes"]
+                 
+                 if original_video_info and "item_list" in original_video_info and len(original_video_info["item_list"]) > 0:
+                     data = original_video_info["item_list"][0]
 
-            # 如果没有视频信息，获取并抛出异常
-            if len(original_video_info["item_list"]) == 0:
-                err_detail_msg = "failed to parse video info from HTML"
-                if len(filter_list := original_video_info["filter_list"]) > 0:
-                    err_detail_msg = filter_list[0]["detail_msg"]
-                raise Exception(err_detail_msg)
-
-            data = original_video_info["item_list"][0]
-        else:
-            raise Exception("Unknown data structure")
+            # 3. 尝试匹配 app.videoDetail (新版 RENDER_DATA 常见结构)
+            elif "app" in json_data and "videoDetail" in json_data["app"]:
+                 data = json_data["app"]["videoDetail"]
+            
+            # 4. 尝试直接在根节点找 aweme_detail (部分 SSR 数据)
+            elif "aweme_detail" in json_data:
+                data = json_data["aweme_detail"]
 
         if not data:
-            raise Exception("Failed to extract data from response")
+             # 如果上述都没匹配到，尝试在 loaderData 里做最后的挣扎（防止 key 变了）
+             if isinstance(json_data, dict) and "loaderData" in json_data:
+                  pass # 已经在上面 loaderData 分支处理过了，这里只是占位
+             
+             raise Exception("Unknown data structure or failed to extract data")
 
         # 获取图集图片地址
         images = []

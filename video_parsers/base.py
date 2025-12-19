@@ -89,10 +89,12 @@ class VideoInfo:
 
 
 class BaseParser(ABC):
-    @staticmethod
-    def get_default_headers() -> Dict[str, str]:
+    def get_default_headers(self) -> dict:
+        # 使用固定的、真实的安卓 User-Agent，比随机生成的更稳
         return {
-            "User-Agent": fake_useragent.UserAgent(os=["ios"]).random,
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
+            "Referer": "https://www.douyin.com/",
+            "Accept-Language": "zh-CN,zh;q=0.9",
         }
 
     @abstractmethod
