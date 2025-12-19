@@ -116,12 +116,17 @@ async def video_proxy(url: str):
         if r.status_code == 403:
              raise HTTPException(status_code=403, detail="Upstream server forbidden (Hotlinking)")
 
-        # 转发 Content-Type
-        content_type = r.headers.get("Content-Type", "video/mp4")
+        # 过滤并重组响应头
+        # 强制设置为附件下载，并指定文件名（虽然小程序不看文件名，但对浏览器友好）
+        response_headers = {
+            "Content-Disposition": 'attachment; filename="video.mp4"',
+            "Content-Type": r.headers.get("Content-Type", "video/mp4")
+        }
         
         return StreamingResponse(
             r.iter_content(chunk_size=1024*1024), 
-            media_type=content_type
+            headers=response_headers,
+            media_type=response_headers["Content-Type"]
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Proxy failed: {str(e)}")
