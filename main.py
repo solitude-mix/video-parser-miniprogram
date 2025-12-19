@@ -91,7 +91,7 @@ async def video_id_parse(source: VideoSource, video_id: str):
         }
 
 
-@app.get("/video/proxy", dependencies=get_auth_dependency())
+@app.get("/video/proxy")
 async def video_proxy(url: str):
     """
     代理下载视频，绕过防盗链
