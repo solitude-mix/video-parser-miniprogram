@@ -162,3 +162,5 @@ cython_debug/
 
 # test files
 test.py
+
+wechat_miniprogram/project.private.config.json

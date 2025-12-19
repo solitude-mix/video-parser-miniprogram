@@ -2,7 +2,7 @@
   "miniprogramRoot": "./",
   "projectname": "video-parser",
   "description": "Video Parser Mini Program",
-  "appid": "wxe5409c721eeb8978",
+  "appid": "touristappid",
   "setting": {
     "urlCheck": false,
     "es6": true,
