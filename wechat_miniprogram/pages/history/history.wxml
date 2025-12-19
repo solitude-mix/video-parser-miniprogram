@@ -1,0 +1,30 @@
+<view class="container">
+  <view class="header">
+    <text class="page-title">历史记录</text>
+    <view class="clear-all" bindtap="onClearAll" wx:if="{{historyList.length > 0}}">
+      <text>清空</text>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{historyList.length === 0}}">
+    <text>暂无历史记录</text>
+  </view>
+
+  <scroll-view scroll-y class="history-list">
+    <block wx:for="{{historyList}}" wx:key="timestamp">
+      <view class="history-item" bindtap="onTapItem" data-item="{{item}}">
+        <image class="cover" src="{{item.cover_url}}" mode="aspectFill"></image>
+        <view class="info">
+          <text class="title">{{item.title || '无标题'}}</text>
+          <view class="meta">
+            <text class="author">{{item.author.name}}</text>
+            <text class="time">{{item.displayTime}}</text>
+          </view>
+        </view>
+        <view class="delete-btn" catchtap="onDeleteItem" data-index="{{index}}">
+          <text>×</text>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+</view>

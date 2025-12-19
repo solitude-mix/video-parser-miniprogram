@@ -1,0 +1,88 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+  padding-top: 50rpx;
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.clear-all {
+  font-size: 26rpx;
+  color: #aaa;
+  padding: 10rpx 20rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400rpx;
+  color: #666;
+  font-size: 28rpx;
+}
+
+.history-list {
+  height: calc(100vh - 150rpx);
+}
+
+.history-item {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 20rpx;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  position: relative;
+}
+
+.cover {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 10rpx;
+  background: #000;
+  margin-right: 20rpx;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.title {
+  font-size: 28rpx;
+  color: #fff;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 22rpx;
+  color: #888;
+}
+
+.delete-btn {
+  width: 50rpx;
+  height: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  color: #666;
+  position: absolute;
+  right: 10rpx;
+  bottom: 10rpx;
+}

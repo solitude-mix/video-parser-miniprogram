@@ -1,0 +1,133 @@
+<view class="container">
+  <!-- 背景装饰 -->
+  <view class="bg-decoration"></view>
+  <view class="bg-decoration-2"></view>
+
+  <!-- 顶部导航栏 -->
+  <view class="nav-header">
+    <view class="logo-area">
+      <text class="logo-text">Video Parser</text>
+      <text class="logo-sub">万能视频解析工具</text>
+    </view>
+    <view class="history-btn" bindtap="goToHistory">
+      <image class="icon-history" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCI+PC9jaXJjbGU+PHBvbHlsaW5lIHBvaW50cz0iMTIgNiAxMiAxMiAxNiAxNCI+PC9wb2x5bGluZT48L3N2Zz4="></image>
+      <text>历史</text>
+    </view>
+  </view>
+
+  <!-- 输入区域 -->
+  <view class="input-card">
+    <view class="textarea-wrapper">
+      <textarea 
+        class="url-input" 
+        placeholder="粘贴视频分享链接（抖音/快手/B站/微博...）" 
+        placeholder-class="input-placeholder"
+        bindinput="onInput"
+        value="{{inputValue}}"
+        maxlength="-1"
+        disable-default-padding
+      ></textarea>
+      <!-- 清空按钮 -->
+      <view class="clear-btn" bindtap="onClear" wx:if="{{inputValue}}">
+        <image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM5OTkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48bGluZSB4MT0iMTgiIHkxPSI2IiB4Mj0iNiIgeTI9IjE4Ij48L2xpbmU+PGxpbmUgeDE9IjYiIHkxPSI2IiB4Mj0iMTgiIHkyPSIxOCI+PC9saW5lPjwvc3ZnPg=="></image>
+      </view>
+    </view>
+    
+    <view class="tool-bar">
+      <view class="paste-btn" bindtap="onPaste">
+        <text>🔥 自动粘贴</text>
+      </view>
+      <view class="parse-btn {{loading ? 'loading' : ''}}" bindtap="onParse" hover-class="btn-hover">
+        <text>{{loading ? '解析中...' : '开始解析'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 解析结果区域 -->
+  <view class="result-area {{result ? 'show' : ''}}" wx:if="{{result}}">
+    <!-- 作者信息 -->
+    <view class="author-card" wx:if="{{result.author}}">
+      <image class="avatar" src="{{result.author.avatar || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwBHdRmejX7u0vVz0z0z0z0z0/0'}}" mode="aspectFill"></image>
+      <view class="author-info">
+        <text class="author-name">{{result.author.name}}</text>
+        <text class="video-desc">{{result.title}}</text>
+      </view>
+    </view>
+
+    <!-- 内容展示: 视频 or 图集 -->
+    <view class="media-content">
+      <!-- 视频播放器 -->
+      <video 
+        wx:if="{{!isImages}}" 
+        id="videoPlayer"
+        class="video-player" 
+        src="{{result.video_url}}" 
+        poster="{{result.cover_url}}" 
+        object-fit="contain"
+        show-center-play-btn
+        show-play-btn
+        controls
+        enable-play-gesture
+      ></video>
+
+      <!-- 图集轮播 -->
+      <swiper 
+        wx:if="{{isImages}}" 
+        class="image-swiper" 
+        indicator-dots 
+        indicator-active-color="#07c160"
+        circular
+      >
+        <block wx:for="{{result.images}}" wx:key="url">
+          <swiper-item>
+            <image src="{{item.url}}" mode="aspectFit" class="slide-image" bindtap="previewImage" data-current="{{item.url}}"></image>
+          </swiper-item>
+        </block>
+      </swiper>
+    </view>
+
+    <!-- 操作按钮组 -->
+    <view class="action-grid">
+      <view class="action-item" bindtap="copyUrl" data-url="{{result.video_url}}" wx:if="{{!isImages}}">
+        <view class="icon-box blue">
+           <image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSI5IiB5PSI5IiB3aWR0aD0iMTMiIGhlaWdodD0iMTMiIHJ4PSIyIiByeT0iMiI+PC9yZWN0PjxwYXRoIGQ9Ik01IDE1SDRWM2gxMXYyIj48L3BhdGg+PC9zdmc+"></image>
+        </view>
+        <text>复制链接</text>
+      </view>
+
+      <view class="action-item" bindtap="downloadVideo" wx:if="{{!isImages}}">
+        <view class="icon-box green">
+          <image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjEgMTV2NGEyIDIgMCAwIDEtMiAySDVhMiAyIDAgMCAxLTItMnYtNCI+PC9wYXRoPjxwb2x5bGluZSBwb2ludHM9IjcgMTAgMTIgMTUgMTcgMTAiPjwvcG9seWxpbmU+PGxpbmUgeDE9IjEyIiB5MT0iMTUiIHgyPSIxMiIgeTI9IjMiPjwvbGluZT48L3N2Zz4="></image>
+        </view>
+        <text>保存视频</text>
+      </view>
+
+      <view class="action-item" bindtap="downloadCover">
+        <view class="icon-box purple">
+          <image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIzIiB5PSIzIiB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHJ4PSIyIiByeT0iMiI+PC9yZWN0PjxjaXJjbGUgY3g9IjguNSIgY3k9IjguNSIgcj0iMS41Ij48L2NpcmNsZT48cG9seWxpbmUgcG9pbnRzPSIyMSAxNSAxNiAxMCA1IDIxIj48L3BvbHlsaW5lPjwvc3ZnPg=="></image>
+        </view>
+        <text>保存封面</text>
+      </view>
+
+       <view class="action-item" bindtap="copyTitle">
+        <view class="icon-box orange">
+           <image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI0IDcgNCA0IDIwIDQgMjAgNyI+PC9wb2x5bGluZT48bGluZSB4MT0iOSIgeTE9IjIwIiB4Mj0iMTUiIHkyPSIyMCI+PC9saW5lPjxsaW5lIHgxPSIxMiIgeTE9IjQiIHgyPSIxMiIgeTI9IjIwIj48L2xpbmU+PC9zdmc+"></image>
+        </view>
+        <text>复制文案</text>
+      </view>
+    </view>
+    
+    <view wx:if="{{isImages}}" class="tips">
+      <text>* 点击图片预览可长按保存</text>
+    </view>
+
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-toast {{error ? 'show' : ''}}" wx:if="{{error}}">
+    <image class="error-icon" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCI+PC9jaXJjbGU+PGxpbmUgeDE9IjEyIiB5MT0iOCIgeDI9IjEyIiB5Mj0iMTIiPjwvbGluZT48bGluZSB4MT0iMTIiIHkxPSIxNiIgeDI9IjEyLjAxIiB5Mj0iMTYiPjwvbGluZT48L3N2Zz4="></image>
+    <text>{{error}}</text>
+  </view>
+  
+  <view style="height: 40rpx"></view>
+</view>
