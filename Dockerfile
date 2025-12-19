@@ -5,7 +5,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # 复制当前目录下的相关文件到容器的工作目录
-COPY ./parser /app/parser
+COPY ./video_parsers /app/video_parsers
 COPY ./templates /app/templates
 COPY ./utils /app/utils
 COPY ./requirements.txt /app/
