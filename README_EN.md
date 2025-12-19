@@ -98,6 +98,7 @@ Upon success, the terminal will show: `Uvicorn running on http://0.0.0.0:8000`
 2.  Open the tool and select **"Import Project"**.
 3.  **Directory**: Select the `wechat_miniprogram` folder in this project.
 4.  **AppID**: Use a Test ID (click "Test ID" on the login/register screen) or your own AppID.
+    > **Note**: For privacy reasons, the AppID in `project.config.json` is set to `touristappid`. After importing, please update it to your own AppID in the IDE settings, or configure it in `project.private.config.json` (this file is ignored by Git).
 5.  **Crucial Settings**:
     *   Click **"Details" (详情)** -> **"Local Settings" (本地设置)** in the top right corner.
     *   ✅ **Check "Does not verify valid domain names, web-view (business domain names), TLS versions, and HTTPS certificates"**.

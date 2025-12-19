@@ -100,6 +100,7 @@ python main.py
 2.  打开工具，选择 **"导入项目"**。
 3.  **目录**选择本项目下的 `wechat_miniprogram` 文件夹。
 4.  **AppID**：使用测试号（点击注册/登录界面的"测试号"）或你自己的 AppID。
+    > **注意**：为了保护隐私，`project.config.json` 中的 AppID 已被设置为 `touristappid`。导入项目后，请在开发者工具的详情页修改为你自己的 AppID，或者在 `project.private.config.json` 中配置（该文件不会被提交到 Git）。
 5.  **关键设置**：
     *   点击右上角 **"详情"** -> **"本地设置"**。
     *   ✅ **勾选 "不校验合法域名、web-view（业务域名）、TLS版本以及HTTPS证书"**。
