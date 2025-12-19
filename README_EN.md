@@ -122,6 +122,9 @@ If you want to preview on your phone:
 
 ## ❓ FAQ
 
+**Q: Download fails with 403 Forbidden?**
+A: When clicking to download the video, the target website might identify the request and return 403 Forbidden. You can copy the download link and open it in your phone's built-in browser to download.
+
 **Q: Parsing failed with SSL or connection errors?**
 A: This version has optimized SSL verification logic for some network environments. If errors persist, check if global proxy software is enabled, try disabling it, or enforce `trust_env=False` in the code.
 
