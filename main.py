@@ -5,9 +5,10 @@ from video_parsers import VideoSource, parse_video_id, parse_video_share_url
 
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.templating import Jinja2Templates
+import requests
 # from fastapi_mcp import FastApiMCP
 
 app = FastAPI()
@@ -88,6 +89,35 @@ async def video_id_parse(source: VideoSource, video_id: str):
             "code": 500,
             "msg": str(err),
         }
+
+
+@app.get("/video/proxy", dependencies=get_auth_dependency())
+async def video_proxy(url: str):
+    """
+    代理下载视频，绕过防盗链
+    """
+    if not url:
+        raise HTTPException(status_code=400, detail="Missing url parameter")
+
+    # 简单的防盗链处理 (模拟浏览器 UA)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Referer": "https://www.douyin.com/" 
+    }
+
+    try:
+        # stream=True 开启流式传输，避免大文件占满内存
+        r = requests.get(url, headers=headers, stream=True, timeout=30)
+        
+        # 转发 Content-Type，通常是 video/mp4
+        content_type = r.headers.get("Content-Type", "video/mp4")
+        
+        return StreamingResponse(
+            r.iter_content(chunk_size=1024*1024), 
+            media_type=content_type
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Proxy failed: {str(e)}")
 
 
 # mcp.setup_server()

@@ -222,9 +222,12 @@ Page({
     const url = this.data.result.video_url;
     if (!url) return;
 
+    // Use backend proxy to avoid 403 Forbidden (hotlinking protection)
+    const proxyUrl = `${app.globalData.baseUrl}/video/proxy?url=${encodeURIComponent(url)}`;
+
     wx.showLoading({ title: '下载中...' });
     wx.downloadFile({
-      url: url,
+      url: proxyUrl,
       success: (res) => {
         if (res.statusCode === 200) {
           wx.saveVideoToPhotosAlbum({
