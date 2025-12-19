@@ -123,6 +123,11 @@ Page({
           // 判断是视频还是图集
           const isImages = videoData.images && videoData.images.length > 0;
           
+          // 生成代理地址，用于绕过防盗链 (预览和下载都用这个)
+          if (videoData.video_url) {
+            videoData.proxy_url = `${app.globalData.baseUrl}/video/proxy?url=${encodeURIComponent(videoData.video_url)}`;
+          }
+
           this.setData({
             result: videoData,
             isImages: isImages
@@ -171,6 +176,7 @@ Page({
   },
 
   copyUrl(e) {
+    // 复制时依然复制原始链接 (result.video_url)，方便用户分享
     const url = e.currentTarget.dataset.url;
     wx.setClipboardData({
       data: url,
@@ -219,15 +225,15 @@ Page({
   },
   
   downloadVideo() {
-    const url = this.data.result.video_url;
+    // 优先使用代理地址下载
+    const url = this.data.result.proxy_url || this.data.result.video_url;
     if (!url) return;
 
-    // Use backend proxy to avoid 403 Forbidden (hotlinking protection)
-    const proxyUrl = `${app.globalData.baseUrl}/video/proxy?url=${encodeURIComponent(url)}`;
+    console.log("正在下载视频:", url);
 
     wx.showLoading({ title: '下载中...' });
     wx.downloadFile({
-      url: proxyUrl,
+      url: url,
       success: (res) => {
         if (res.statusCode === 200) {
           wx.saveVideoToPhotosAlbum({
