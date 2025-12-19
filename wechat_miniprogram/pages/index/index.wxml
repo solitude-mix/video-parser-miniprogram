@@ -43,6 +43,15 @@
     </view>
   </view>
 
+  <!-- 温馨提示 -->
+  <view class="tips-card" wx:if="{{!result}}">
+    <view class="tips-title">温馨提示</view>
+    <view class="tips-content">
+      <text>1. 粘贴视频地址时无需删除文案</text>
+      <text>2. 点击保存视频时, 可能会被对应网站识别, 报 403 Forbidden, 可以复制下载链接，打开手机自带的浏览器中进行下载。</text>
+    </view>
+  </view>
+
   <!-- 解析结果区域 -->
   <view class="result-area {{result ? 'show' : ''}}" wx:if="{{result}}">
     <!-- 作者信息 -->

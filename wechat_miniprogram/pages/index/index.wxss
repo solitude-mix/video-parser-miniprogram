@@ -282,3 +282,31 @@
   25% { transform: translateX(-55%); }
   75% { transform: translateX(-45%); }
 }
+
+/* 温馨提示 */
+.tips-card {
+  margin-top: 40rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20rpx;
+  padding: 24rpx;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.tips-title {
+  font-size: 26rpx;
+  color: #aaa;
+  font-weight: bold;
+  margin-bottom: 16rpx;
+}
+
+.tips-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.tips-content text {
+  font-size: 24rpx;
+  color: #888;
+  line-height: 1.6;
+  margin-bottom: 8rpx;
+}
