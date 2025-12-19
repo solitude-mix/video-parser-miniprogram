@@ -134,6 +134,14 @@ A: 请尝试使用国内镜像源：`pip install -r requirements.txt -i http://m
 
 ---
 
+## 🤝 友好社区推荐 (Friendly Community)
+
+**[LINUX DO](https://linux.do)** - 新一代 Linux 技术社区。
+
+> 社区文化：**真诚、友善、团结、专业**，共建你我引以为荣之社区。
+
+---
+
 ## ⚖️ 免责声明 (Disclaimer)
 
 *   本项目仅供学习和技术研究使用，**严禁用于任何商业用途**。

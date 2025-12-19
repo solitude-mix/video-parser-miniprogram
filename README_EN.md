@@ -129,6 +129,14 @@ A: Some videos have "hard subtitles" or watermarks embedded directly into the vi
 
 ---
 
+## 🤝 Recommended Community
+
+**[LINUX DO](https://linux.do)** - The new generation Linux technology community.
+
+> Community Culture: **Sincerity, Friendliness, Unity, Professionalism**. Building a community we are all proud of.
+
+---
+
 ## ⚖️ Disclaimer
 
 *   This project is for learning and technical research purposes only. **Commercial use is strictly prohibited.**
