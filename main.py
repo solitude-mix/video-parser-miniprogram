@@ -134,7 +134,9 @@ async def video_proxy(url: str):
 
     async def iter_file():
         try:
-            async with httpx.AsyncClient(verify=False, trust_env=False, follow_redirects=True) as client:
+            # Increase timeout to 60s (connect=10.0, read=60.0, write=10.0, pool=10.0)
+            timeout = httpx.Timeout(60.0, connect=10.0)
+            async with httpx.AsyncClient(verify=False, trust_env=False, follow_redirects=True, timeout=timeout) as client:
                 async with client.stream("GET", url, headers=headers) as response:
                     if response.status_code >= 400:
                         logger.error(f"Upstream server returned {response.status_code} for URL: {url}")
