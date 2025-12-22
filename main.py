@@ -1,15 +1,23 @@
 import os
 import re
 import secrets
+import logging
 from video_parsers import VideoSource, parse_video_id, parse_video_share_url
 
 import uvicorn
+import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.templating import Jinja2Templates
-import requests
 # from fastapi_mcp import FastApiMCP
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -43,6 +51,7 @@ def get_auth_dependency() -> list[Depends]:
             credentials.password, basic_auth_password
         )
         if not (correct_username and correct_password):
+            logger.warning(f"Failed login attempt with username: {credentials.username}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect username or password",
@@ -66,13 +75,23 @@ async def read_item(request: Request):
 
 @app.get("/video/share/url/parse", dependencies=get_auth_dependency())
 async def share_url_parse(url: str):
+    logger.info(f"Parsing share URL: {url}")
     url_reg = re.compile(r"http[s]?:\/\/[\w.-]+[\w\/-]*[\w.-]*\??[\w=&:\-\+\%]*[/]*")
-    video_share_url = url_reg.search(url).group()
+    search_res = url_reg.search(url)
+    if not search_res:
+        logger.error(f"Invalid URL format: {url}")
+        return {
+            "code": 400,
+            "msg": "Invalid URL",
+        }
+    video_share_url = search_res.group()
 
     try:
         video_info = await parse_video_share_url(video_share_url)
+        logger.info(f"Successfully parsed URL: {video_share_url}")
         return {"code": 200, "msg": "解析成功", "data": video_info.__dict__}
     except Exception as err:
+        logger.error(f"Error parsing URL {video_share_url}: {err}", exc_info=True)
         return {
             "code": 500,
             "msg": str(err),
@@ -81,57 +100,58 @@ async def share_url_parse(url: str):
 
 @app.get("/video/id/parse", dependencies=get_auth_dependency())
 async def video_id_parse(source: VideoSource, video_id: str):
+    logger.info(f"Parsing video ID: {video_id} from source: {source}")
     try:
         video_info = await parse_video_id(source, video_id)
+        logger.info(f"Successfully parsed ID: {video_id}")
         return {"code": 200, "msg": "解析成功", "data": video_info.__dict__}
     except Exception as err:
+        logger.error(f"Error parsing ID {video_id}: {err}", exc_info=True)
         return {
             "code": 500,
             "msg": str(err),
         }
 
 
-@app.get("/video/proxy")
+@app.get("/video/proxy", dependencies=get_auth_dependency())
 async def video_proxy(url: str):
     """
-    代理下载视频，绕过防盗链
+    Proxy video download to bypass 403 Forbidden (anti-hotlinking).
     """
     if not url:
         raise HTTPException(status_code=400, detail="Missing url parameter")
 
-    # 使用与 base.py 一致的 Android UA，这在解析时已被证明能绕过反爬
+    logger.info(f"Proxy request for URL: {url}")
+
+    # Use robust headers to mimic a real mobile request and bypass hotlinking protection
     headers = {
-        "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
         "Accept": "*/*",
         "Accept-Encoding": "identity;q=1, *;q=0",
         "Accept-Language": "zh-CN,zh;q=0.9",
-        "Range": "bytes=0-", # 模拟播放器请求
-        "Referer": "https://www.douyin.com/", # 尝试带回 Referer，部分 CDN 需要
+        "Range": "bytes=0-",
     }
 
-    try:
-        # stream=True 开启流式传输
-        # verify=False 忽略 SSL 验证
-        r = requests.get(url, headers=headers, stream=True, timeout=30, verify=False)
-        
-        # 如果上游返回 403，手动抛出异常以便调试
-        if r.status_code == 403:
-             raise HTTPException(status_code=403, detail="Upstream server forbidden (Hotlinking)")
+    async def iter_file():
+        try:
+            async with httpx.AsyncClient(verify=False, trust_env=False, follow_redirects=True) as client:
+                async with client.stream("GET", url, headers=headers) as response:
+                    if response.status_code >= 400:
+                        logger.error(f"Upstream server returned {response.status_code} for URL: {url}")
+                        # Consume response to avoid hanging connection
+                        await response.aread() 
+                        raise HTTPException(status_code=response.status_code, detail=f"Upstream error {response.status_code}")
+                    
+                    async for chunk in response.aiter_bytes():
+                        yield chunk
+        except httpx.RequestError as exc:
+            logger.error(f"An error occurred while requesting {exc.request.url!r}: {exc}")
+            raise HTTPException(status_code=500, detail=f"Proxy request error: {exc}")
+        except Exception as e:
+            logger.error(f"Unexpected error in proxy: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail="Internal server error")
 
-        # 过滤并重组响应头
-        # 强制设置为附件下载，并指定文件名（虽然小程序不看文件名，但对浏览器友好）
-        response_headers = {
-            "Content-Disposition": 'attachment; filename="video.mp4"',
-            "Content-Type": r.headers.get("Content-Type", "video/mp4")
-        }
-        
-        return StreamingResponse(
-            r.iter_content(chunk_size=1024*1024), 
-            headers=response_headers,
-            media_type=response_headers["Content-Type"]
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Proxy failed: {str(e)}")
+    return StreamingResponse(iter_file(), media_type="video/mp4")
 
 
 # mcp.setup_server()
