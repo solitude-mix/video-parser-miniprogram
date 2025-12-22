@@ -244,17 +244,37 @@ Page({
             fail: (err) => this.handleSaveFail(err)
           })
         } else {
-            wx.showToast({ title: '下载失败:' + res.statusCode, icon: 'none' });
+            // status code error
+            this.handleDownloadError('下载失败(状态码:' + res.statusCode + ')');
         }
       },
       fail: (err) => {
         console.log('Download failed:', err);
-        wx.showToast({ title: '下载请求失败', icon: 'none' });
+        this.handleDownloadError('网络请求失败或超时');
       },
       complete: () => {
         wx.hideLoading();
       }
     })
+  },
+
+  handleDownloadError(reason) {
+      wx.showModal({
+          title: '下载中断',
+          content: `${reason}\n\n温馨提示：如果视频文件过大导致下载失败，请点击“复制链接”，使用手机浏览器打开下载。`,
+          confirmText: '复制链接',
+          cancelText: '关闭',
+          success: (res) => {
+              if (res.confirm) {
+                  wx.setClipboardData({
+                      data: this.data.result.video_url,
+                      success: () => {
+                          wx.showToast({ title: '链接已复制', icon: 'success' });
+                      }
+                  })
+              }
+          }
+      })
   },
 
   handleSaveFail(err) {
