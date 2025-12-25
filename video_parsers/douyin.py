@@ -168,7 +168,10 @@ class DouYin(BaseParser):
         # 图集时，视频地址为空，不处理
         video_mp4_url = ""
         if len(video_url) > 0:
-            video_mp4_url = await self.get_video_redirect_url(video_url)
+            # 修改：直接返回原始地址，让客户端（浏览器）自己去重定向
+            # 这样抖音会根据用户(浏览器)的IP分配最近的CDN节点，解决服务器在海外导致国内下载慢的问题
+            # video_mp4_url = await self.get_video_redirect_url(video_url)
+            video_mp4_url = video_url
 
         # 获取封面图片，优先获取非 .webp 格式的图片 url
         cover_url = ""
